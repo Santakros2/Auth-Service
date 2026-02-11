@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"server.com/auth-service/internal/model"
+	"server.com/auth-service/internal/dto"
 )
 
 func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +13,7 @@ func (h *AuthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req model.LoginRequest
+	var req dto.LoginRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"server.com/auth-service/config"
 	"server.com/auth-service/internal/handler"
 	middleware "server.com/auth-service/internal/middlerware"
+	"server.com/auth-service/internal/repository"
 	"server.com/auth-service/internal/service"
 )
 
@@ -35,23 +36,23 @@ func main() {
 	cfg := config.Load()
 
 	mux := http.NewServeMux()
-	s := service.NewService(cfg.JWTSecret)
-	// Cofig the jwt 
+	r := repository.NewRepo()
+	s := service.NewService(cfg.JWTSecret, r)
+	// Cofig the jwt
 	jwtMW := middleware.JWT(cfg.JWTSecret)
 	han := handler.NewAuthHandler(s)
 
 	mux.HandleFunc("/auth/login", han.LoginHandler)
 	mux.HandleFunc("/auth/signup", han.RegisterHandler)
 
-
-	// protected now return the Handler that then 
+	// protected now return the Handler that then
 	protected := func(h http.HandlerFunc) http.Handler {
 		return jwtMW(h)
 	}
 
 	// mux.HandleFunc("/auth/refresh", han.RegisterHandler)
-	// mux.HandleFunc("/auth/signup", han.RegisterHandler)
-	// 
+	mux.HandleFunc("/auth/signup", han.RegisterHandler)
+	//
 	mux.Handle("/auth/me", protected(han.MeHandler))
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello world")
